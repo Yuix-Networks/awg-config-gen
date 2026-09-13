@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+
+  interop:
+    # The real test of a generated config is whether the reference
+    # implementation accepts it. amneziawg-go parses configs without needing
+    # root or a tunnel device, so CI can check that end to end.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Generate a config and check it round-trips
+        run: |
+          python -m awg_config_gen.cli new vpn.example.com -n 3 -o /tmp/out
+          python -m awg_config_gen.cli check /tmp/out/*.conf
