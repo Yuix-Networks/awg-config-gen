@@ -35,9 +35,12 @@ S_RECOMMENDED = (15, 150)
 #: Header protection needs at least this much padding to work with.
 S_MIN_FOR_HEADER_PROTECTION = 12
 
-#: The difference that must not appear between S1 and S2: the handshake
-#: response is 56 bytes longer than the init, so S1 + 56 == S2 makes the two
-#: messages the same size on the wire.
+#: The difference that must not appear between S1 and S2. WireGuard's
+#: handshake initiation is 148 bytes and its response 92 — the init is the
+#: longer of the two, by exactly 56 — so S1 + 56 == S2 pads them into being
+#: the same size as each other. Upstream states the rule without explaining
+#: it; the sizes are visible in its own bounds, S1 <= 1280-148 and
+#: S2 <= 1280-92.
 S_FORBIDDEN_DELTA = 56
 
 #: The field is a uint32, so this is the hard bound. 5..2147483647 is the
